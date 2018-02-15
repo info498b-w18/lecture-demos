@@ -12,7 +12,7 @@ var Player;
     Player[Player["X"] = 0] = "X";
     Player[Player["O"] = 1] = "O";
     Player[" "] = " ";
-})(Player || (Player = {}));
+})(Player = exports.Player || (exports.Player = {}));
 /**
  * Represents a game of Tic Tac Toe.
  * Board size is hard-coded at 3.
@@ -42,24 +42,18 @@ class TTTGame {
         this.gameBoard[x][y] = this.currentPlayer; //make move
         //check if we now have a winner
         let gb = this.gameBoard;
-        console.log(x, y, gb);
         //check row
         if (gb[x][0] === gb[x][1] && gb[x][1] === gb[x][2])
             this.winner = this.currentPlayer;
-        console.log('row', gb[x][0], gb[x][1], gb[x][2], gb[x][0] === gb[x][1], Player[this.winner]);
         //check col
         if (gb[0][y] === gb[1][y] && gb[1][y] === gb[2][y])
             this.winner = this.currentPlayer;
-        console.log('col', Player[this.winner]);
         //check diag
         if (gb[1][1] !== Player[' '] && ((gb[0][0] === gb[1][1] && gb[1][1] === gb[2][2]) ||
             (gb[2][0] === gb[1][1] && gb[1][1] === gb[0][2])))
             this.winner = this.currentPlayer;
-        console.log('diag', Player[this.winner]);
-        console.log('before toggle', Number(this.currentPlayer));
         this.currentPlayer = (Number(this.currentPlayer) + 1) % 2; //toggle
-        console.log('after toggle', this.currentPlayer);
-        return true;
+        return true; //valid move
     }
     getPiece(x, y) {
         if (x < 0 || x > 2 || y < 0 || y > 2)
@@ -85,9 +79,8 @@ class TTTGame {
         io.question('> ', (input) => {
             try {
                 let cell = input.split(',');
-                //make a move!
-                let result = this.makeMove(Number(cell[0]), Number(cell[1]));
-                if (result) {
+                let legal = this.makeMove(Number(cell[0]), Number(cell[1]));
+                if (legal) {
                     this.printBoard();
                     if (this.getWinner() !== Player[' ']) {
                         this.printWinner(this.getWinner());
@@ -106,10 +99,7 @@ class TTTGame {
         for (let i = 0; i < this.size; i++) {
             let row = i + "   ";
             for (let j = 0; j < this.size; j++) {
-                let player = this.getPiece(i, j);
-                // if(player === undefined) player = -1;
-                // row += this.playerSymbols[player+1];
-                row += Player[player];
+                row += Player[this.getPiece(i, j)];
                 if (j < this.size - 1)
                     row += " | ";
             }
@@ -120,11 +110,9 @@ class TTTGame {
         console.log("");
     }
     printPrompt() {
-        let player = game.getCurrentPlayer();
-        console.log(Player[player] + "'s turn. Pick a spot [row, col]");
+        console.log(Player[game.getCurrentPlayer()] + "'s turn. Pick a spot [row, col]");
     }
     printWinner(winner) {
-        //let player = this.playerSymbols[winner+1]
         console.log(Player[winner] + " is the winner!");
     }
 }
